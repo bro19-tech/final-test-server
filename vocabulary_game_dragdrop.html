@@ -1,0 +1,1976 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Vocabulary Image Challenge</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+
+<style>
+:root {
+
+  --sky: #a8edea;
+  --pink: #fed6e3;
+  --yellow: #ffe066;
+  --green: #43e97b;
+  --orange: #fa8231;
+  --purple: #a55eea;
+  --red: #ff4757;
+  --blue: #1e90ff;
+  --white: #fff;
+  --shadow: 0 8px 24px rgba(0,0,0,0.13);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 50%, #ffe066 100%);
+  background-size: 400% 400%;
+  animation: bgShift 8s ease infinite;
+  overflow-x: hidden;
+  position: relative;
+}
+
+@keyframes bgShift {
+  0%,100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Floating bubbles background */
+.bubble {
+  position: fixed;
+  border-radius: 50%;
+  opacity: 0.18;
+  animation: floatUp linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes floatUp {
+  0% { transform: translateY(110vh) scale(1); opacity: 0.18; }
+  100% { transform: translateY(-10vh) scale(1.1); opacity: 0; }
+}
+
+/* ---- HEADER ---- */
+header {
+  position: relative;
+  z-index: 2;
+  padding: 24px 16px 0;
+  text-align: center;
+}
+
+h1 {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(2rem, 6vw, 3.6rem);
+  color: #fff;
+  text-shadow: 0 4px 0 #fa8231, 0 8px 20px rgba(0,0,0,0.18);
+  letter-spacing: 1px;
+  line-height: 1.1;
+  margin-bottom: 6px;
+  animation: titleBounce 1s cubic-bezier(.36,.07,.19,.97) both;
+}
+@keyframes titleBounce {
+  0% { transform: scale(0.5) rotate(-6deg); opacity: 0; }
+  60% { transform: scale(1.1) rotate(2deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+.subtitle {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.85);
+  letter-spacing: 2px;
+  margin-bottom: 22px;
+}
+
+/* ---- LEVEL BUTTONS ---- */
+.level-wrap {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 2;
+}
+
+.level-btn {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.18rem;
+  padding: 14px 32px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 6px 0 rgba(0,0,0,0.18), var(--shadow);
+  position: relative;
+  letter-spacing: 1px;
+  outline: none;
+}
+.level-btn:active { transform: translateY(4px) scale(0.97); box-shadow: 0 2px 0 rgba(0,0,0,0.18); }
+.level-btn:hover { transform: translateY(-3px) scale(1.06); }
+
+.btn-easy   { background: linear-gradient(135deg, #43e97b, #38f9d7); color: #1a6b3a; box-shadow: 0 6px 0 #1f9e53, var(--shadow); }
+.btn-medium { background: linear-gradient(135deg, #fa8231, #ffe066); color: #7a3a00; box-shadow: 0 6px 0 #c05e10, var(--shadow); }
+.btn-hard   { background: linear-gradient(135deg, #ff4757, #a55eea); color: #fff;    box-shadow: 0 6px 0 #7b1fa2, var(--shadow); }
+
+.btn-easy::before   { content: "⭐"; margin-right: 6px; }
+.btn-medium::before { content: "🔥"; margin-right: 6px; }
+.btn-hard::before   { content: "💥"; margin-right: 6px; }
+
+/* ---- SCOREBOARD ---- */
+#scoreboard {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  margin: 10px auto 0;
+  position: relative;
+  z-index: 2;
+}
+#scoreboard.show { display: flex; }
+
+.score-badge {
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(8px);
+  border-radius: 20px;
+  padding: 8px 22px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.08rem;
+  color: #333;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.score-badge span { font-size: 1.5rem; }
+
+/* Progress bar */
+#progressBar {
+  width: min(400px, 90vw);
+  height: 14px;
+  background: rgba(255,255,255,0.45);
+  border-radius: 20px;
+  overflow: hidden;
+  margin: 10px auto 0;
+  position: relative;
+  z-index: 2;
+  display: none;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.12);
+}
+#progressBar.show { display: block; }
+#progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #43e97b, #ffe066, #fa8231);
+  border-radius: 20px;
+  transition: width 0.5s cubic-bezier(.36,.07,.19,.97);
+  width: 0%;
+  position: relative;
+}
+#progressFill::after {
+  content: '';
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 18px;
+  background: rgba(255,255,255,0.55);
+  border-radius: 50%;
+  filter: blur(4px);
+}
+
+/* ---- GAME AREA ---- */
+#gameArea {
+  position: relative;
+  z-index: 2;
+  margin-top: 16px;
+  padding: 0 12px 40px;
+  display: none;
+}
+#gameArea.show { display: block; }
+
+/* Question card */
+.question-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.85);
+  letter-spacing: 2px;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+/* ---- REDESIGNED QUESTION CARD (word + description + drop zone) ---- */
+.questionBox {
+  width: min(250px, 84vw);
+  min-height: min(210px, 58vw);
+  background: #fff;
+  border-radius: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  margin: 0 auto 10px;
+  box-shadow: 0 10px 0 rgba(0,0,0,0.12), 0 18px 36px rgba(0,0,0,0.13);
+  border: 4px solid rgba(255,255,255,0.85);
+  position: relative;
+  overflow: hidden;
+  animation: cardPop 0.35s cubic-bezier(.36,.07,.19,.97);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+@keyframes cardPop {
+  0% { transform: scale(0.7) rotate(-4deg); opacity: 0; }
+  70% { transform: scale(1.05) rotate(1deg); }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+/* Drag-over highlight for main game questionBox */
+.questionBox.drag-over {
+  box-shadow: 0 0 0 4px rgba(30,144,255,0.5), 0 10px 0 rgba(30,144,255,0.2), 0 18px 36px rgba(0,0,0,0.13) !important;
+  transform: scale(1.03);
+}
+
+/* Word tag at top of card */
+.question-word-tag {
+  width: 100%;
+  background: linear-gradient(135deg, #fa8231, #ffe066);
+  color: #7a3a00;
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(1.2rem, 4.5vw, 1.65rem);
+  text-align: center;
+  padding: 10px 8px 9px;
+  border-radius: 18px 18px 0 0;
+  letter-spacing: 2px;
+  flex-shrink: 0;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+}
+
+/* Description area (the drop zone) */
+.question-desc-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 130px;
+  padding: 12px 14px 10px;
+  background: #f8f9ff;
+}
+
+.question-desc-text {
+  font-family: 'Nunito', sans-serif;
+  font-size: clamp(0.76rem, 2.2vw, 0.88rem);
+  color: #555;
+  text-align: center;
+  line-height: 1.55;
+  position: relative;
+  z-index: 1;
+}
+
+.question-drop-hint {
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.72rem;
+  color: #bbb;
+  margin-top: 7px;
+  letter-spacing: 1px;
+  text-align: center;
+  animation: hintPulse 2s ease-in-out infinite;
+}
+@keyframes hintPulse {
+  0%,100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* Dropped image container - covers desc area */
+.dropped-img-wrap {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.97);
+  border-radius: 0 0 18px 18px;
+  padding: 8px;
+  animation: dropReveal 0.35s cubic-bezier(.36,.07,.19,.97);
+  z-index: 5;
+}
+.dropped-img-wrap.show { display: flex; }
+.dropped-img-wrap img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;   /* NO CROPPING — full image always visible */
+  border-radius: 10px;
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+
+/* Feedback ring on card */
+.dropped-img-wrap.correct-glow {
+  background: rgba(67,233,123,0.18);
+  box-shadow: inset 0 0 0 3px #43e97b;
+}
+.dropped-img-wrap.wrong-glow {
+  background: rgba(255,71,87,0.14);
+  box-shadow: inset 0 0 0 3px #ff4757;
+}
+
+.pick-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.35rem;
+  color: #fff;
+  text-shadow: 0 3px 0 rgba(0,0,0,0.15);
+  text-align: center;
+  margin-bottom: 14px;
+  letter-spacing: 1px;
+}
+
+/* ---- OPTIONS ---- */
+.options {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.option {
+  width: clamp(110px, 26vw, 150px);
+  aspect-ratio: 1;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 7px 0 rgba(0,0,0,0.13), 0 12px 24px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  border: 3px solid rgba(255,255,255,0.7);
+  position: relative;
+  overflow: hidden;
+  animation: optionPop 0.3s cubic-bezier(.36,.07,.19,.97) backwards;
+}
+.option:nth-child(1) { animation-delay: 0.05s; }
+.option:nth-child(2) { animation-delay: 0.1s; }
+.option:nth-child(3) { animation-delay: 0.15s; }
+.option:nth-child(4) { animation-delay: 0.2s; }
+.option:nth-child(5) { animation-delay: 0.25s; }
+
+@keyframes optionPop {
+  0% { transform: scale(0.6) translateY(20px); opacity: 0; }
+  70% { transform: scale(1.05) translateY(-4px); }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.option:hover:not(.correct):not(.wrong) {
+  transform: translateY(-6px) scale(1.05);
+  box-shadow: 0 14px 0 rgba(0,0,0,0.13), 0 18px 30px rgba(0,0,0,0.13);
+}
+.option:active:not(.correct):not(.wrong) {
+  transform: translateY(2px) scale(0.96);
+  box-shadow: 0 3px 0 rgba(0,0,0,0.13);
+}
+
+.option img {
+  width: 88%;
+  height: 88%;
+  object-fit: cover;
+  border-radius: 14px;
+  pointer-events: none;
+}
+
+.option.correct {
+  background: linear-gradient(135deg, #43e97b, #38f9d7);
+  border-color: #2ecc71;
+  animation: correctPop 0.4s cubic-bezier(.36,.07,.19,.97);
+  box-shadow: 0 7px 0 #1e9e5a, 0 12px 28px rgba(67,233,123,0.4);
+}
+@keyframes correctPop {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.18) rotate(3deg); }
+  60% { transform: scale(0.96) rotate(-1deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+.option.wrong {
+  background: linear-gradient(135deg, #ff4757, #ff6b81);
+  border-color: #c0392b;
+  animation: wrongShake 0.4s cubic-bezier(.36,.07,.19,.97);
+  box-shadow: 0 7px 0 #c0392b, 0 12px 28px rgba(255,71,87,0.35);
+}
+@keyframes wrongShake {
+  0%,100% { transform: translateX(0); }
+  20% { transform: translateX(-8px) rotate(-3deg); }
+  40% { transform: translateX(8px) rotate(3deg); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+
+/* ---- CONFETTI ---- */
+.confetti-piece {
+  position: fixed;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  animation: confettiFall linear forwards;
+  pointer-events: none;
+  z-index: 999;
+}
+@keyframes confettiFall {
+  0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+/* ---- RESULT SCREEN ---- */
+#resultScreen {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+#resultScreen.show { display: flex; }
+
+.result-card {
+  background: #fff;
+  border-radius: 36px;
+  padding: 48px 40px 36px;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+  animation: resultPop 0.5s cubic-bezier(.36,.07,.19,.97);
+  max-width: 360px;
+  width: 90vw;
+}
+@keyframes resultPop {
+  0% { transform: scale(0.5) rotate(-8deg); opacity: 0; }
+  70% { transform: scale(1.07) rotate(2deg); }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+.result-emoji { font-size: 4.5rem; display: block; margin-bottom: 10px; }
+.result-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 2.2rem;
+  color: #fa8231;
+  text-shadow: 0 3px 0 #ffe066;
+  margin-bottom: 8px;
+}
+.result-sub {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 24px;
+}
+.result-score {
+  font-family: 'Fredoka One', cursive;
+  font-size: 3rem;
+  background: linear-gradient(135deg, #43e97b, #fa8231);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 24px;
+}
+
+.play-again-btn {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.3rem;
+  padding: 14px 36px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #fa8231, #ffe066);
+  color: #7a3a00;
+  box-shadow: 0 6px 0 #c05e10;
+  transition: transform 0.15s, box-shadow 0.15s;
+  letter-spacing: 1px;
+}
+.play-again-btn:hover { transform: translateY(-3px); }
+.play-again-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #c05e10; }
+
+/* Stars decoration */
+.star-deco {
+  position: fixed;
+  font-size: 1.5rem;
+  animation: starFloat 4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.55;
+}
+@keyframes starFloat {
+  0%,100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-18px) rotate(15deg); }
+}
+
+/* Drop overlay animation */
+@keyframes dropReveal {
+  0% { transform: translateY(40px) scale(0.92); opacity: 0; }
+  70% { transform: translateY(-4px) scale(1.02); }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* Drag-over highlight for practice question box */
+.practice-qbox.drag-over {
+  border-color: #1e90ff !important;
+  box-shadow: 0 0 0 4px rgba(30,144,255,0.35), 0 10px 0 rgba(30,144,255,0.18), 0 18px 36px rgba(0,0,0,0.13) !important;
+  transform: scale(1.03);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.hidden{display:none!important;}
+
+/* ---- HOW TO PLAY BUTTON ---- */
+.htp-btn-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 18px;
+  position: relative;
+  z-index: 2;
+}
+
+.htp-open-btn {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.1rem;
+  padding: 11px 28px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  background: rgba(255,255,255,0.82);
+  color: #fa8231;
+  box-shadow: 0 5px 0 rgba(0,0,0,0.13), 0 8px 20px rgba(0,0,0,0.1);
+  transition: transform 0.15s, box-shadow 0.15s;
+  letter-spacing: 1px;
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.htp-open-btn:hover { transform: translateY(-3px) scale(1.05); }
+.htp-open-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(0,0,0,0.13); }
+
+/* ---- HOW TO PLAY MODAL ---- */
+#htpModal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.40);
+  backdrop-filter: blur(10px);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+#htpModal.show { display: flex; }
+
+.htp-card {
+  background: #fff;
+  border-radius: 32px;
+  padding: 36px 32px 28px;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.28);
+  animation: htpPop 0.45s cubic-bezier(.36,.07,.19,.97);
+  max-width: 420px;
+  width: 95vw;
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+@keyframes htpPop {
+  0% { transform: scale(0.5) rotate(-6deg); opacity: 0; }
+  70% { transform: scale(1.05) rotate(1.5deg); }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+/* Close button */
+.htp-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  font-size: 1.6rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #ccc;
+  line-height: 1;
+  transition: color 0.15s, transform 0.15s;
+}
+.htp-close:hover { color: #fa8231; transform: scale(1.2) rotate(10deg); }
+
+/* Title */
+.htp-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 2rem;
+  color: #fa8231;
+  text-shadow: 0 3px 0 #ffe066;
+  margin-bottom: 6px;
+}
+.htp-sub-emoji { font-size: 2.2rem; margin-bottom: 14px; display: block; }
+
+/* Language Toggle */
+.lang-toggle {
+  display: inline-flex;
+  background: #f0f0f0;
+  border-radius: 50px;
+  padding: 4px;
+  margin-bottom: 22px;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.08);
+}
+.lang-btn {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1rem;
+  padding: 8px 22px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  background: transparent;
+  color: #aaa;
+  transition: background 0.2s, color 0.2s, transform 0.15s;
+  letter-spacing: 1px;
+}
+.lang-btn.active {
+  background: linear-gradient(135deg, #fa8231, #ffe066);
+  color: #7a3a00;
+  box-shadow: 0 4px 10px rgba(250,130,49,0.35);
+  transform: scale(1.04);
+}
+
+/* Steps */
+.htp-steps { text-align: left; margin-bottom: 20px; }
+
+.htp-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  margin-bottom: 10px;
+  background: #fafafa;
+  border: 2px solid #f0f0f0;
+  transition: transform 0.15s;
+}
+.htp-step:hover { transform: translateX(4px); }
+
+.step-icon {
+  font-size: 1.9rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.step-text strong {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.05rem;
+  color: #333;
+  display: block;
+  margin-bottom: 2px;
+}
+.step-text p {
+  font-size: 0.88rem;
+  color: #777;
+  line-height: 1.4;
+}
+
+/* Level info */
+.htp-levels {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.htp-level-badge {
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.88rem;
+  padding: 7px 14px;
+  border-radius: 50px;
+  letter-spacing: 0.5px;
+}
+.badge-easy   { background: linear-gradient(135deg, #43e97b, #38f9d7); color: #1a6b3a; }
+.badge-medium { background: linear-gradient(135deg, #fa8231, #ffe066); color: #7a3a00; }
+.badge-hard   { background: linear-gradient(135deg, #ff4757, #a55eea); color: #fff; }
+
+/* Play button inside modal */
+.htp-play-btn {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.2rem;
+  padding: 14px 40px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #43e97b, #38f9d7);
+  color: #1a6b3a;
+  box-shadow: 0 6px 0 #1f9e53;
+  transition: transform 0.15s, box-shadow 0.15s;
+  letter-spacing: 1px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.htp-play-btn:hover { transform: translateY(-3px); }
+.htp-play-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #1f9e53; }
+
+/* ---- PRACTICE BUTTON ---- */
+.btn-practice {
+  background: linear-gradient(135deg, #1e90ff, #a55eea);
+  color: #fff;
+  box-shadow: 0 6px 0 #1260c0, var(--shadow);
+  font-size: 1.1rem;
+  padding: 13px 28px;
+}
+.btn-practice::before { content: "✏️"; margin-right: 7px; }
+
+/* ---- PRACTICE AREA ---- */
+#practiceArea {
+  display: none;
+  position: relative;
+  z-index: 2;
+  margin-top: 16px;
+  padding: 0 12px 40px;
+}
+#practiceArea.show { display: block; }
+
+/* Practice top bar */
+.practice-topbar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.practice-badge {
+  background: linear-gradient(135deg, #1e90ff, #a55eea);
+  color: #fff;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1rem;
+  padding: 8px 22px;
+  border-radius: 50px;
+  box-shadow: 0 4px 12px rgba(30,144,255,0.3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 1px;
+}
+.practice-progress-badge {
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(8px);
+  color: #333;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1rem;
+  padding: 8px 22px;
+  border-radius: 50px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Exit practice button */
+.practice-exit-btn {
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.95rem;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  background: rgba(255,255,255,0.7);
+  color: #888;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+  transition: transform 0.15s, color 0.15s;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  backdrop-filter: blur(6px);
+}
+.practice-exit-btn:hover { color: #ff4757; transform: scale(1.05); }
+
+/* Practice question box — mirrors main questionBox, blue theme */
+.practice-qbox {
+  width: min(250px, 84vw);
+  min-height: min(210px, 58vw);
+  background: #fff;
+  border-radius: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  margin: 0 auto 0;
+  box-shadow: 0 10px 0 rgba(30,144,255,0.18), 0 18px 36px rgba(0,0,0,0.13);
+  border: 4px solid rgba(30,144,255,0.35);
+  position: relative;
+  overflow: hidden;
+  animation: cardPop 0.35s cubic-bezier(.36,.07,.19,.97);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+/* Practice card - blue word tag */
+.practice-word-tag {
+  width: 100%;
+  background: linear-gradient(135deg, #1e90ff, #a55eea);
+  color: #fff;
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(1.2rem, 4.5vw, 1.65rem);
+  text-align: center;
+  padding: 10px 8px 9px;
+  border-radius: 18px 18px 0 0;
+  letter-spacing: 2px;
+  flex-shrink: 0;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.18);
+}
+
+/* Word reveal label (shown after answering) */
+.word-reveal {
+  text-align: center;
+  margin: 10px auto 12px;
+  min-height: 38px;
+}
+.word-reveal-tag {
+  display: inline-block;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.35rem;
+  background: linear-gradient(135deg, #1e90ff, #a55eea);
+  color: #fff;
+  padding: 7px 28px;
+  border-radius: 50px;
+  box-shadow: 0 4px 14px rgba(30,144,255,0.35);
+  letter-spacing: 2px;
+  animation: revealPop 0.4s cubic-bezier(.36,.07,.19,.97);
+}
+@keyframes revealPop {
+  0% { transform: scale(0.5) translateY(10px); opacity: 0; }
+  70% { transform: scale(1.08); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Feedback message */
+.practice-feedback {
+  text-align: center;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.15rem;
+  min-height: 30px;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
+.feedback-correct { color: #2ecc71; }
+.feedback-wrong   { color: #ff4757; }
+
+/* Practice action buttons row */
+.practice-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 12px 0 8px;
+  flex-wrap: wrap;
+  min-height: 52px;
+}
+.practice-hint-btn {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1rem;
+  padding: 11px 24px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  background: rgba(255,255,255,0.82);
+  color: #a55eea;
+  box-shadow: 0 4px 0 rgba(165,94,234,0.3);
+  transition: transform 0.15s;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  backdrop-filter: blur(6px);
+}
+.practice-hint-btn:hover { transform: translateY(-2px) scale(1.04); }
+.practice-hint-btn:disabled { opacity: 0.4; cursor: default; transform: none; }
+
+.practice-next-btn {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.05rem;
+  padding: 11px 28px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #1e90ff, #a55eea);
+  color: #fff;
+  box-shadow: 0 5px 0 #1260c0;
+  transition: transform 0.15s, box-shadow 0.15s;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.practice-next-btn:hover { transform: translateY(-3px); }
+.practice-next-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #1260c0; }
+
+/* Practice option label overlay */
+.option-word-label {
+  position: absolute;
+  bottom: 0;
+  left: 0; right: 0;
+  background: rgba(30,144,255,0.85);
+  color: #fff;
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.72rem;
+  text-align: center;
+  padding: 4px 2px;
+  letter-spacing: 1px;
+  border-radius: 0 0 14px 14px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.option.show-label .option-word-label { opacity: 1; }
+
+/* ---- PRACTICE RESULT SCREEN ---- */
+#practiceResult {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.38);
+  backdrop-filter: blur(10px);
+  z-index: 150;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+#practiceResult.show { display: flex; }
+
+.practice-result-card {
+  background: #fff;
+  border-radius: 36px;
+  padding: 40px 32px 32px;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(30,144,255,0.25);
+  animation: resultPop 0.5s cubic-bezier(.36,.07,.19,.97);
+  max-width: 380px;
+  width: 92vw;
+}
+.pr-emoji  { font-size: 4.2rem; display: block; margin-bottom: 10px; }
+.pr-title  {
+  font-family: 'Fredoka One', cursive;
+  font-size: 2rem;
+  background: linear-gradient(135deg, #1e90ff, #a55eea);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+.pr-sub {
+  font-size: 1rem;
+  color: #777;
+  margin-bottom: 22px;
+  line-height: 1.5;
+}
+.pr-divider {
+  border: none;
+  border-top: 2px dashed #e0e0e0;
+  margin: 18px 0;
+}
+.pr-cta-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.05rem;
+  color: #aaa;
+  margin-bottom: 12px;
+  letter-spacing: 1px;
+}
+.pr-level-btns {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.pr-back-btn {
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.95rem;
+  padding: 10px 22px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  background: #f5f5f5;
+  color: #aaa;
+  transition: transform 0.15s, color 0.15s;
+  letter-spacing: 0.5px;
+}
+.pr-back-btn:hover { transform: scale(1.04); color: #555; }
+
+.btn-common{
+  font-family:'Fredoka One',cursive;
+  border:none;
+  border-radius:50px;
+  cursor:pointer;
+  transition:.15s;
+  letter-spacing:1px;
+}
+
+.flex-center{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.modal-common{
+  display:none;
+  position:fixed;
+  inset:0;
+  justify-content:center;
+  align-items:center;
+  background:rgba(0,0,0,.4);
+  backdrop-filter:blur(8px);
+}
+
+.card-common{
+  background:#fff;
+  border-radius:24px;
+  box-shadow:0 12px 28px rgba(0,0,0,.15);
+}
+
+.game-img{
+  object-fit:cover;
+  border-radius:14px;
+}
+
+</style>
+</head>
+
+<body>
+<!-- Background Music -->
+<audio id="bgMusic" autoplay loop>
+  <source src="Updated HarvestMoon Backsound.mp3" type="audio/mpeg">
+</audio>
+
+<!-- Music Toggle Button -->
+<button id="musicToggle" onclick="toggleMusic()" style="
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1rem;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  background: rgba(255,255,255,0.85);
+  color: #fa8231;
+  box-shadow: 0 5px 0 rgba(0,0,0,0.13), 0 8px 20px rgba(0,0,0,0.12);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: transform 0.15s, box-shadow 0.15s;
+  letter-spacing: 0.5px;
+" onmouseover="this.style.transform='translateY(-3px) scale(1.05)'" onmouseout="this.style.transform=''">
+  🎵 Music: ON
+</button>
+
+
+<!-- Background bubbles -->
+<div class="bubble" style="width:80px;height:80px;background:#fa8231;left:8%;animation-duration:9s;animation-delay:0s;"></div>
+<div class="bubble" style="width:50px;height:50px;background:#a55eea;left:25%;animation-duration:12s;animation-delay:2s;"></div>
+<div class="bubble" style="width:100px;height:100px;background:#43e97b;left:55%;animation-duration:10s;animation-delay:1s;"></div>
+<div class="bubble" style="width:60px;height:60px;background:#1e90ff;left:75%;animation-duration:8s;animation-delay:3s;"></div>
+<div class="bubble" style="width:40px;height:40px;background:#ffe066;left:88%;animation-duration:11s;animation-delay:0.5s;"></div>
+
+<!-- Floating stars -->
+<div class="star-deco" style="top:12%;left:5%;animation-delay:0s;">⭐</div>
+<div class="star-deco" style="top:20%;right:6%;animation-delay:1s;font-size:2rem;">🌟</div>
+<div class="star-deco" style="top:55%;left:3%;animation-delay:2s;">💫</div>
+<div class="star-deco" style="top:70%;right:4%;animation-delay:0.5s;font-size:2.2rem;">⭐</div>
+
+<!-- Header -->
+<header>
+  <h1>🌍 English Flashcard Game 🌍</h1>
+  <p class="subtitle">✨ by: Rakha Dwi Anugerah & Tegar Adi Nugroho ✨</p>
+</header>
+
+<!-- How to Play Button -->
+<div class="htp-btn-wrap">
+  <button class="htp-open-btn" onclick="openHTP()">
+    <span>📖</span> How to Play
+  </button>
+</div>
+
+<!-- How to Play Modal -->
+<div id="htpModal">
+  <div class="htp-card">
+    <button class="htp-close" onclick="closeHTP()">✕</button>
+
+    <span class="htp-sub-emoji">🎮</span>
+    <div class="htp-title" id="htpTitle">How to Play</div>
+
+    <!-- Language Toggle -->
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="btnEN" onclick="setLang('en')">🇬🇧 English</button>
+      <button class="lang-btn" id="btnID" onclick="setLang('id')">🇮🇩 Indonesia</button>
+    </div>
+
+    <!-- Steps Content -->
+    <div class="htp-steps" id="htpSteps">
+      <!-- Filled by JS -->
+    </div>
+
+    <!-- Level Badges -->
+    <div class="htp-levels" id="htpLevels">
+      <!-- Filled by JS -->
+    </div>
+
+    <button class="htp-play-btn" onclick="closeHTP()">
+      <span>🚀</span> <span id="htpPlayLabel">Let's Play!</span>
+    </button>
+  </div>
+</div>
+
+<!-- Level buttons -->
+<div class="level-wrap">
+  <button class="level-btn btn-easy"   onclick="startGame('easy')">Easy (5)</button>
+  <button class="level-btn btn-medium" onclick="startGame('medium')">Medium (10)</button>
+  <button class="level-btn btn-hard"   onclick="startGame('hard')">Hard (15)</button>
+</div>
+<div class="level-wrap" style="margin-top:6px;">
+  <button class="level-btn btn-practice" onclick="startPractice()">Practice / Latihan</button>
+</div>
+
+<!-- Practice Area -->
+<div id="practiceArea">
+  <!-- Top Bar -->
+  <div class="practice-topbar">
+    <div class="practice-badge">✏️ Practice Mode</div>
+    <div class="practice-progress-badge">Soal <span id="pQNum">1</span> / <span id="pQTotal">3</span></div>
+    <button class="practice-exit-btn" onclick="exitPractice()">✕ Keluar</button>
+  </div>
+
+  <!-- Question label -->
+  <p class="question-label" style="color:rgba(255,255,255,0.9);">👀 Gambar apakah ini? — What is this?</p>
+
+  <!-- Question image -->
+  <div class="practice-qbox" id="practiceQBox">
+    <!-- Blue word tag -->
+    <div class="practice-word-tag" id="practiceWordTag">?????</div>
+    <!-- Description drop zone -->
+    <div class="question-desc-area" id="practiceDescArea">
+      <p class="question-desc-text" id="practiceDescText">Loading...</p>
+      <p class="question-drop-hint">⬇️ Seret atau ketuk gambar di bawah!</p>
+      <!-- Dropped image covers desc area -->
+      <div class="dropped-img-wrap" id="practiceDroppedWrap">
+        <img id="practiceDroppedImg" src="" alt="">
+      </div>
+    </div>
+  </div>
+
+  <!-- Word reveal (hidden until answered) -->
+  <div class="word-reveal" id="wordReveal"></div>
+
+  <!-- Feedback -->
+  <div class="practice-feedback" id="practiceFeedback"></div>
+
+  <!-- Options -->
+  <p class="pick-label" style="margin-bottom:10px;">👇 Pilih gambar yang benar! 👇</p>
+  <div class="options" id="practiceOptions"></div>
+
+  <!-- Action buttons -->
+  <div class="practice-actions" id="practiceActions">
+    <button class="practice-hint-btn" id="hintBtn" onclick="showHint()">💡 Hint</button>
+  </div>
+</div>
+
+<!-- Practice Result Screen -->
+<div id="practiceResult">
+  <div class="practice-result-card">
+    <span class="pr-emoji">🎓</span>
+    <div class="pr-title">Latihan Selesai!</div>
+    <p class="pr-sub" id="prSubText">Kamu sudah siap bermain!<br>Now choose a level to play the real game!</p>
+    <hr class="pr-divider">
+    <p class="pr-cta-label">🎮 Pilih Level untuk Bermain</p>
+    <div class="pr-level-btns">
+      <button class="level-btn btn-easy"   style="font-size:0.95rem;padding:11px 22px;" onclick="closePracticeResult();startGame('easy')">⭐ Easy (5)</button>
+      <button class="level-btn btn-medium" style="font-size:0.95rem;padding:11px 22px;" onclick="closePracticeResult();startGame('medium')">🔥 Medium (10)</button>
+      <button class="level-btn btn-hard"   style="font-size:0.95rem;padding:11px 22px;" onclick="closePracticeResult();startGame('hard')">💥 Hard (15)</button>
+    </div>
+    <button class="pr-back-btn" onclick="closePracticeResult()">↩ Latihan Lagi</button>
+  </div>
+</div>
+
+<!-- Score + Progress -->
+<div id="scoreboard">
+  <div class="score-badge"><span>🏆</span> Score: <strong id="scoreNum">0</strong></div>
+  <div class="score-badge"><span>📸</span> <span id="qNum">1</span> / <span id="qTotal">5</span></div>
+</div>
+<div id="progressBar"><div id="progressFill"></div></div>
+
+<!-- Game Area -->
+<div id="gameArea">
+  <p class="question-label">🔍 WHAT IS THIS?</p>
+  <div class="questionBox" id="mainQuestionBox">
+    <!-- Word label -->
+    <div class="question-word-tag" id="questionWordTag">?????</div>
+    <!-- Description drop zone -->
+    <div class="question-desc-area" id="questionDescArea">
+      <p class="question-desc-text" id="questionDescText">Loading...</p>
+      <p class="question-drop-hint">⬇️ Drop or tap an image below!</p>
+      <!-- Dropped image covers desc area -->
+      <div class="dropped-img-wrap" id="mainDroppedWrap">
+        <img id="mainDroppedImg" src="" alt="">
+      </div>
+    </div>
+  </div>
+  <p class="pick-label">👇 Pick the right picture! 👇</p>
+  <div class="options" id="optionsContainer"></div>
+</div>
+
+<!-- Result Screen -->
+<div id="resultScreen">
+  <div class="result-card">
+    <span class="result-emoji" id="resultEmoji">🎉</span>
+    <div class="result-title" id="resultTitle">Level Complete!</div>
+    <div class="result-score" id="resultScore">10 / 10</div>
+    <div class="result-sub">Amazing job, keep it up! 🚀</div>
+    <button class="play-again-btn" onclick="hideResult()">🎮 Play Again!</button>
+  </div>
+</div>
+
+<script>
+
+window.addEventListener('click', () => {
+  const music = document.getElementById('bgMusic');
+  if (music.paused) {
+    music.play().catch(() => {});
+  }
+}, { once: true });
+
+
+const mixedData = [
+{ word:"MOUNTAIN", image:"assets/mixed/MOUNTAIN1.png" },
+{ word:"EARTH", image:"assets/mixed/EARTH1.png" },
+{ word:"STAR", image:"assets/mixed/STAR1.png" },
+{ word:"TREE", image:"assets/mixed/TREE1.png" },
+{ word:"SUN", image:"assets/mixed/SUN1.png" },
+{ word:"OCEAN", image:"assets/mixed/OCEAN1.png" },
+{ word:"ISLAND", image:"assets/mixed/ISLAND1.png" },
+{ word:"CLOUD", image:"assets/mixed/CLOUD1.png" },
+{ word:"RAIN", image:"assets/mixed/RAIN1.png" },
+{ word:"DESERT", image:"assets/mixed/DESERT1.png" },
+{ word:"WAVE", image:"assets/mixed/WAVE1.png" },
+{ word:"LAKE", image:"assets/mixed/LAKE1.png" },
+{ word:"CAVE", image:"assets/mixed/CAVE1.png" },
+{ word:"ROCK", image:"assets/mixed/ROCK1.png" },
+{ word:"SNOW", image:"assets/mixed/SNOW1.png" },
+{ word:"BOIL", image:"assets/mixed/BOIL1.png" },
+{ word:"BRANCH", image:"assets/mixed/BRANCH1.png" },
+{ word:"CABLE", image:"assets/mixed/CABLE1.png" },
+{ word:"CLIFF", image:"assets/mixed/CLIFF1.png" },
+{ word:"EARTHQUAKE", image:"assets/mixed/EARTHQUAKE1.png" },
+{ word:"ECLIPSE", image:"assets/mixed/ECLIPSE1.png" },
+{ word:"ELECTRICITY", image:"assets/mixed/ELECTRICITY1.png" },
+{ word:"FLOOD", image:"assets/mixed/FLOOD1.png" },
+{ word:"FOOD CHAIN", image:"assets/mixed/FOODCHAIN1.png" },
+{ word:"LEAF", image:"assets/mixed/LEAF1.png" },
+{ word:"MELT", image:"assets/mixed/MELT1.png" },
+{ word:"POND", image:"assets/mixed/POND1.png" },
+{ word:"RECYCLE", image:"assets/mixed/RECYCLE1.png" },
+{ word:"ROOT", image:"assets/mixed/ROOT1.png" },
+{ word:"SOCKET", image:"assets/mixed/SOCKET1.png" },
+{ word:"SPACE", image:"assets/mixed/SPACE1.png" },
+{ word:"STEM", image:"assets/mixed/STEM1.png" },
+{ word:"STORM", image:"assets/mixed/STORM1.png" },
+{ word:"SWITCH", image:"assets/mixed/SWITCH1.png" },
+{ word:"WATERFALL", image:"assets/mixed/WATERFALL1.png" }
+];
+
+const hardData = [
+{ word:"GLACIER", image:"assets/hard/GLACIER1.png" },
+{ word:"ICEBERG", image:"assets/hard/ICEBERG1.png" },
+{ word:"LANDSLIDE", image:"assets/hard/LANDSLIDE1.png" },
+{ word:"LIGHTNING", image:"assets/hard/LIGHTNING1.png" },
+{ word:"PENINSULA", image:"assets/hard/PENINSULA1.png" },
+{ word:"CORAL REEF", image:"assets/hard/CORALREEF1.png" },
+{ word:"POLLUTION", image:"assets/hard/POLLUTION1.png" },
+{ word:"FOREST", image:"assets/hard/FOREST1.png" },
+{ word:"VALLEY", image:"assets/hard/VALLEY1.png" },
+{ word:"SOLAR PANEL", image:"assets/hard/SOLARPANEL1.png" },
+{ word:"SWAMP", image:"assets/hard/SWAMP1.png" },
+{ word:"COMPOST", image:"assets/hard/COMPOST1.png" },
+{ word:"GREENHOUSE", image:"assets/hard/GREENHOUSE1.png" },
+{ word:"FOG", image:"assets/hard/FOG1.png" },
+{ word:"ATE", image:"assets/hard/ATE1.png" },
+{ word:"BRAIN", image:"assets/hard/BRAIN1.png" },
+{ word:"CLIMBED", image:"assets/hard/CLIMBED1.png" },
+{ word:"COAL", image:"assets/hard/COAL1.png" },
+{ word:"CONDENSATION", image:"assets/hard/CONDENSATION1.png" },
+{ word:"COOKED", image:"assets/hard/COOKED1.png" },
+{ word:"EXTINCTION", image:"assets/hard/EXTINCTION1.png" },
+{ word:"FLEW", image:"assets/hard/FLEW1.png" },
+{ word:"FOSSIL", image:"assets/hard/FOSSIL1.png" },
+{ word:"GASOLINE", image:"assets/hard/GASOLINE1.png" },
+{ word:"HURRICANE", image:"assets/hard/HURRICANE1.png" },
+{ word:"JOGGED", image:"assets/hard/JOGGED1.png" },
+{ word:"PLANTED", image:"assets/hard/PLANTED1.png" },
+{ word:"RESPIRATION", image:"assets/hard/RESPIRATION1.png" },
+{ word:"RUST", image:"assets/hard/RUST1.png" },
+{ word:"SEED", image:"assets/hard/SEED1.png" },
+{ word:"STOMACH", image:"assets/hard/STOMACH1.png" },
+{ word:"STUDIED", image:"assets/hard/STUDIED1.png" },
+{ word:"SWAM", image:"assets/hard/SWAM1.png" },
+{ word:"WOKE UP", image:"assets/hard/WOKEUP1.png" }
+];
+
+/* ===== WORD DESCRIPTIONS (shown in question card) ===== */
+const descriptions = {
+  "MOUNTAIN":     "Bentang alam yang sangat tinggi dan menjulang di atas tanah sekitarnya.",
+  "EARTH":        "Planet ketiga dari Matahari, tempat kita tinggal dan hidup.",
+  "STAR":         "Bola gas bercahaya yang berada jauh di luar angkasa.",
+  "TREE":         "Tanaman tinggi dengan batang keras, cabang, dan daun.",
+  "SUN":          "Bintang di pusat tata surya kita yang memberi cahaya dan panas.",
+  "OCEAN":        "Hamparan air asin yang sangat luas menutupi sebagian besar Bumi.",
+  "ISLAND":       "Daratan yang dikelilingi oleh air di semua sisinya.",
+  "CLOUD":        "Kumpulan tetesan air atau kristal es yang melayang di langit.",
+  "RAIN":         "Air yang jatuh dari awan ke permukaan bumi.",
+  "DESERT":       "Daerah sangat kering dengan sedikit curah hujan dan vegetasi.",
+  "WAVE":         "Riak atau gelombang air yang bergerak di permukaan laut.",
+  "LAKE":         "Genangan air yang besar dan dikelilingi oleh daratan.",
+  "CAVE":         "Ruang kosong alami di dalam bebatuan atau di bawah tanah.",
+  "ROCK":         "Material alam keras yang terbuat dari berbagai mineral.",
+  "SNOW":         "Kristal air beku berwarna putih yang jatuh dari awan.",
+  "BOIL":         "Memanaskan cairan hingga mencapai titik didih dan menghasilkan uap.",
+  "BRANCH":       "Bagian pohon yang tumbuh keluar dan bercabang dari batang utamanya.",
+  "CABLE":        "Kawat atau tali tebal yang digunakan untuk mengalirkan listrik.",
+  "CLIFF":        "Tebing batu yang sangat curam di tepi laut atau daratan.",
+  "EARTHQUAKE":   "Guncangan kuat yang terjadi di permukaan bumi akibat pergerakan lempeng.",
+  "ECLIPSE":      "Ketika satu benda langit menghalangi cahaya dari benda langit lainnya.",
+  "ELECTRICITY":  "Bentuk energi yang dihasilkan oleh pergerakan elektron melalui konduktor.",
+  "FLOOD":        "Terlalu banyak air yang meluap dan menggenangi daratan.",
+  "FOOD CHAIN":   "Rangkaian organisme di mana satu organisme memakan organisme lainnya.",
+  "LEAF":         "Bagian datar dan hijau dari tanaman yang berfungsi membuat makanan.",
+  "MELT":         "Proses perubahan zat padat menjadi cair akibat kenaikan suhu.",
+  "POND":         "Genangan air kecil yang tenang, lebih kecil dari sebuah danau.",
+  "RECYCLE":      "Mengolah kembali bahan bekas agar dapat dimanfaatkan lagi.",
+  "ROOT":         "Bagian tanaman yang berada di bawah tanah untuk menyerap air dan nutrisi.",
+  "SOCKET":       "Alat listrik tempat menancapkan steker peralatan elektronik.",
+  "SPACE":        "Wilayah luas yang berada di luar atmosfer Bumi kita.",
+  "STEM":         "Batang utama tanaman yang menopang daun, bunga, dan buah.",
+  "STORM":        "Cuaca buruk dengan angin kencang, hujan lebat, dan petir.",
+  "SWITCH":       "Alat untuk menyalakan atau mematikan aliran listrik.",
+  "WATERFALL":    "Air yang jatuh dari ketinggian melewati tebing atau bebatuan.",
+  "GLACIER":      "Sungai es besar yang bergerak perlahan di pegunungan atau kutub.",
+  "ICEBERG":      "Massa es raksasa yang mengapung di laut, sebagian besar tersembunyi di bawah air.",
+  "LANDSLIDE":    "Pergerakan tanah dan batuan yang meluncur cepat menuruni lereng bukit.",
+  "LIGHTNING":    "Kilatan listrik yang terjadi di langit saat cuaca badai.",
+  "PENINSULA":    "Daratan yang menjorok ke laut dan hampir seluruhnya dikelilingi air.",
+  "CORAL REEF":   "Struktur bawah laut yang terbentuk dari rangka hewan karang kecil.",
+  "POLLUTION":    "Pencemaran lingkungan akibat zat-zat berbahaya yang dilepaskan ke alam.",
+  "FOREST":       "Area luas yang dipenuhi pohon-pohon besar dan berbagai tanaman liar.",
+  "VALLEY":       "Lembah, yaitu daerah rendah yang diapit oleh perbukitan atau pegunungan.",
+  "SOLAR PANEL":  "Panel yang mengubah energi sinar matahari menjadi energi listrik.",
+  "SWAMP":        "Lahan basah berawa yang selalu tergenang air dan ditumbuhi tanaman.",
+  "COMPOST":      "Bahan organik yang membusuk dan digunakan sebagai pupuk alami.",
+  "GREENHOUSE":   "Bangunan berdinding kaca untuk menanam tanaman dalam kondisi terkontrol.",
+  "FOG":          "Kabut tebal dekat permukaan tanah yang membuat jarak pandang terbatas.",
+  "ATE":          "Bentuk lampau dari kata 'eat' — artinya telah memakan sesuatu.",
+  "BRAIN":        "Organ di dalam kepala yang berfungsi mengontrol seluruh tubuh kita.",
+  "CLIMBED":      "Bentuk lampau dari kata 'climb' — artinya telah mendaki atau memanjat.",
+  "COAL":         "Batuan hitam dari sisa tanaman purba yang digunakan sebagai bahan bakar.",
+  "CONDENSATION": "Tetesan air yang terbentuk pada permukaan dingin saat uap berubah menjadi cair.",
+  "COOKED":       "Bentuk lampau dari kata 'cook' — artinya telah memasak makanan.",
+  "EXTINCTION":   "Kepunahan — semua anggota suatu spesies telah mati untuk selamanya.",
+  "FLEW":         "Bentuk lampau dari kata 'fly' — artinya telah terbang.",
+  "FOSSIL":       "Sisa-sisa organisme purba yang terawetkan dalam batuan selama jutaan tahun.",
+  "GASOLINE":     "Bahan bakar cair yang digunakan untuk menggerakkan mesin kendaraan bermotor.",
+  "HURRICANE":    "Badai tropis yang sangat kuat dengan angin berputar yang dahsyat.",
+  "JOGGED":       "Bentuk lampau dari kata 'jog' — artinya telah berlari santai.",
+  "PLANTED":      "Bentuk lampau dari kata 'plant' — artinya telah menanam sesuatu.",
+  "RESPIRATION":  "Proses menghirup oksigen dan mengeluarkan karbon dioksida oleh makhluk hidup.",
+  "RUST":         "Lapisan coklat kemerahan yang terbentuk pada logam besi akibat oksidasi.",
+  "SEED":         "Biji tanaman yang dapat tumbuh menjadi tanaman baru.",
+  "STOMACH":      "Organ pencernaan yang mencerna makanan setelah masuk ke dalam tubuh.",
+  "STUDIED":      "Bentuk lampau dari kata 'study' — artinya telah belajar atau mempelajari.",
+  "SWAM":         "Bentuk lampau dari kata 'swim' — artinya telah berenang.",
+  "WOKE UP":      "Bentuk lampau dari kata 'wake up' — artinya telah terbangun dari tidur."
+};
+
+const sourceBank = [
+{ word:"MOUNTAIN", image:"images/MOUNTAIN.png" },
+{ word:"EARTH", image:"images/EARTH.png" },
+{ word:"STAR", image:"images/STAR.png" },
+{ word:"TREE", image:"images/TREE.png" },
+{ word:"SUN", image:"images/SUN.png" },
+{ word:"OCEAN", image:"images/OCEAN.png" },
+{ word:"ISLAND", image:"images/ISLAND.png" },
+{ word:"CLOUD", image:"images/CLOUD.png" },
+{ word:"RAIN", image:"images/RAIN.png" },
+{ word:"DESERT", image:"images/DESERT.png" },
+{ word:"WAVE", image:"images/WAVE.png" },
+{ word:"LAKE", image:"images/LAKE.png" },
+{ word:"CAVE", image:"images/CAVE.png" },
+{ word:"ROCK", image:"images/ROCK.png" },
+{ word:"SNOW", image:"images/SNOW.png" },
+{ word:"GLACIER", image:"images/GLACIER.png" },
+{ word:"ICEBERG", image:"images/ICEBERG.png" },
+{ word:"LANDSLIDE", image:"images/LANDSLIDE.png" },
+{ word:"LIGHTNING", image:"images/LIGHTNING.png" },
+{ word:"PENINSULA", image:"images/PENINSULA.png" },
+{ word:"CORAL REEF", image:"images/CORALREEF.png" },
+{ word:"POLLUTION", image:"images/POLLUTION.png" },
+{ word:"FOREST", image:"images/FOREST.png" },
+{ word:"VALLEY", image:"images/VALLEY.png" },
+{ word:"SOLAR PANEL", image:"images/SOLARPANEL.png" },
+{ word:"SWAMP", image:"images/SWAMP.png" },
+{ word:"COMPOST", image:"images/COMPOST.png" },
+{ word:"GREENHOUSE", image:"images/GREENHOUSE.png" },
+{ word:"FOG", image:"images/FOG.png" },
+{ word:"ECLIPSE", image:"images/ECLIPSE.png" },
+{ word:"BOIL", image:"images/BOIL.png" },
+{ word:"BRANCH", image:"images/BRANCH.png" },
+{ word:"CABLE", image:"images/CABLE.png" },
+{ word:"CLIFF", image:"images/CLIFF.png" },
+{ word:"EARTHQUAKE", image:"images/EARTHQUAKE.png" },
+{ word:"ELECTRICITY", image:"images/ELECTRICITY.png" },
+{ word:"FLOOD", image:"images/FLOOD.png" },
+{ word:"FOOD CHAIN", image:"images/FOODCHAIN.png" },
+{ word:"LEAF", image:"images/LEAF.png" },
+{ word:"MELT", image:"images/MELT.png" },
+{ word:"POND", image:"images/POND.png" },
+{ word:"RECYCLE", image:"images/RECYCLE.png" },
+{ word:"ROOT", image:"images/ROOT.png" },
+{ word:"SOCKET", image:"images/SOCKET.png" },
+{ word:"SPACE", image:"images/SPACE.png" },
+{ word:"STEM", image:"images/STEM.png" },
+{ word:"STORM", image:"images/STORM.png" },
+{ word:"SWITCH", image:"images/SWITCH.png" },
+{ word:"WATERFALL", image:"images/WATERFALL.png" },
+{ word:"ATE", image:"images/ATE.png" },
+{ word:"BRAIN", image:"images/BRAIN.png" },
+{ word:"CLIMBED", image:"images/CLIMBED.png" },
+{ word:"COAL", image:"images/COAL.png" },
+{ word:"CONDENSATION", image:"images/CONDENSATION.png" },
+{ word:"COOKED", image:"images/COOKED.png" },
+{ word:"EXTINCTION", image:"images/EXTINCTION.png" },
+{ word:"FLEW", image:"images/FLEW.png" },
+{ word:"FOSSIL", image:"images/FOSSIL.png" },
+{ word:"GASOLINE", image:"images/GASOLINE.png" },
+{ word:"HURRICANE", image:"images/HURRICANE.png" },
+{ word:"JOGGED", image:"images/JOGGED.png" },
+{ word:"PLANTED", image:"images/PLANTED.png" },
+{ word:"RESPIRATION", image:"images/RESPIRATION.png" },
+{ word:"RUST", image:"images/RUST.png" },
+{ word:"SEED", image:"images/SEED.png" },
+{ word:"STOMACH", image:"images/STOMACH.png" },
+{ word:"STUDIED", image:"images/STUDIED.png" },
+{ word:"SWAM", image:"images/SWAM.png" },
+{ word:"WOKE UP", image:"images/WOKEUP.png" },
+];
+
+/* ===== PRACTICE MODE ===== */
+let practiceQuestions = [], practiceIndex = 0, practiceLocked = false;
+const PRACTICE_COUNT = 3;
+const PRACTICE_CHOICES = 3;
+
+function startPractice() {
+  hideAllModes();
+  practiceQuestions = shuffle(mixedData).slice(0, PRACTICE_COUNT);
+  practiceIndex = 0;
+  practiceLocked = false;
+
+  document.getElementById('practiceArea').classList.add('show');
+  document.getElementById('pQTotal').textContent = PRACTICE_COUNT;
+  loadPracticeQuestion();
+}
+
+function exitPractice() {
+  document.getElementById('practiceArea').classList.remove('show');
+  document.getElementById('practiceResult').classList.remove('show');
+}
+
+function loadPracticeQuestion() {
+  practiceLocked = false;
+  document.getElementById('wordReveal').innerHTML = '';
+  document.getElementById('practiceFeedback').innerHTML = '';
+  document.getElementById('pQNum').textContent = practiceIndex + 1;
+
+  // Reset actions to just hint button
+  document.getElementById('practiceActions').innerHTML =
+    `<button class="practice-hint-btn" id="hintBtn" onclick="showHint()">💡 Hint / Bantuan</button>`;
+
+  const q = practiceQuestions[practiceIndex];
+
+  // === Update practice card with word + description ===
+  document.getElementById('practiceWordTag').textContent = q.word;
+  document.getElementById('practiceDescText').textContent =
+    descriptions[q.word] || q.word;
+
+  // Clear dropped image
+  const pDropWrap = document.getElementById('practiceDroppedWrap');
+  const pDropImg  = document.getElementById('practiceDroppedImg');
+  pDropWrap.className = 'dropped-img-wrap';
+  pDropImg.src = '';
+
+  // Animate card
+  const pqBox = document.getElementById('practiceQBox');
+  pqBox.style.animation = 'none'; pqBox.offsetHeight;
+  pqBox.style.animation = 'cardPop 0.35s cubic-bezier(.36,.07,.19,.97)';
+
+  // === Drag-and-drop zone ===
+  pqBox.ondragover  = (e) => { e.preventDefault(); pqBox.classList.add('drag-over'); };
+  pqBox.ondragleave = ()  => pqBox.classList.remove('drag-over');
+  pqBox.ondrop      = (e) => {
+    e.preventDefault();
+    pqBox.classList.remove('drag-over');
+    if (practiceLocked) return;
+    const word  = e.dataTransfer.getData('word');
+    const image = e.dataTransfer.getData('image');
+    pDropImg.src = image;
+    pDropWrap.classList.add('show');
+    selectPracticeAnswerByWord(word);
+  };
+
+  // Build options
+  const correct = sourceBank.find(i => i.word === q.word);
+  const wrong   = shuffle(sourceBank.filter(i => i.word !== q.word)).slice(0, PRACTICE_CHOICES - 1);
+  const all     = shuffle([correct, ...wrong]);
+
+  const container = document.getElementById('practiceOptions');
+  container.innerHTML = '';
+  all.forEach((item, idx) => {
+    const div = document.createElement('div');
+    div.className = 'option';
+    div.dataset.word  = item.word;
+    div.dataset.image = item.image;
+    div.style.animationDelay = (0.05 + idx * 0.07) + 's';
+    div.innerHTML = `
+      <img src="${item.image}" alt="${item.word}">
+      <span class="option-word-label">${item.word}</span>
+    `;
+
+    // Click — also shows image on practice card
+    div.onclick = () => {
+      if (practiceLocked) return;
+      pDropImg.src  = item.image;
+      pDropWrap.classList.add('show');
+      selectPracticeAnswer(div);
+    };
+
+    // Desktop drag
+    div.draggable = true;
+    div.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('word',  item.word);
+      e.dataTransfer.setData('image', item.image);
+      div.style.opacity = '0.55';
+    });
+    div.addEventListener('dragend', () => { div.style.opacity = ''; });
+
+    container.appendChild(div);
+  });
+}
+
+function showDropOverlay(imageSrc, word) {
+  // Legacy function — now handled inline in loadPracticeQuestion drag/click handlers
+  const pDropImg  = document.getElementById('practiceDroppedImg');
+  const pDropWrap = document.getElementById('practiceDroppedWrap');
+  if (pDropImg && pDropWrap) {
+    pDropImg.src = imageSrc;
+    pDropWrap.classList.add('show');
+  }
+}
+
+function clearDropOverlay() {
+  const pDropWrap = document.getElementById('practiceDroppedWrap');
+  const pDropImg  = document.getElementById('practiceDroppedImg');
+  if (pDropWrap) { pDropWrap.className = 'dropped-img-wrap'; }
+  if (pDropImg)  { pDropImg.src = ''; }
+}
+
+function showHint() {
+  if (practiceLocked) return;
+  // Reveal word labels on all options
+  document.querySelectorAll('#practiceOptions .option').forEach(o => {
+    o.classList.add('show-label');
+  });
+  // Disable hint button after use
+  const btn = document.getElementById('hintBtn');
+  if (btn) { btn.disabled = true; btn.textContent = '💡 Sudah ditampilkan!'; }
+}
+
+function selectPracticeAnswerByWord(word) {
+  const options = document.querySelectorAll('#practiceOptions .option');
+  const div = [...options].find(o => o.dataset.word === word);
+  if (div) selectPracticeAnswer(div);
+}
+
+function selectPracticeAnswer(div) {
+  if (practiceLocked) return;
+  practiceLocked = true;
+
+  const selected = div.dataset.word;
+  const correct  = practiceQuestions[practiceIndex].word;
+  const options  = document.querySelectorAll('#practiceOptions .option');
+  const pDropWrap = document.getElementById('practiceDroppedWrap');
+
+  // Reveal all word labels
+  options.forEach(o => o.classList.add('show-label'));
+
+  if (selected === correct) {
+    div.classList.add('correct');
+    pDropWrap.classList.add('correct-glow');
+    document.getElementById('practiceFeedback').innerHTML =
+      `<span class="feedback-correct">✅ Benar! — Correct! 🎉</span>`;
+    spawnConfetti();
+  } else {
+    div.classList.add('wrong');
+    pDropWrap.classList.add('wrong-glow');
+    document.getElementById('practiceFeedback').innerHTML =
+      `<span class="feedback-wrong">❌ Kurang tepat! — Not quite! Lihat jawaban yang benar 👇</span>`;
+    setTimeout(() => {
+      options.forEach(o => { if (o.dataset.word === correct) o.classList.add('correct'); });
+    }, 500);
+  }
+
+  // Show the word reveal tag
+  document.getElementById('wordReveal').innerHTML =
+    `<span class="word-reveal-tag">📖 ${correct}</span>`;
+
+  // Replace actions with Next/Done button
+  const isLast = (practiceIndex + 1) >= PRACTICE_COUNT;
+  document.getElementById('practiceActions').innerHTML = isLast
+    ? `<button class="practice-next-btn" onclick="finishPractice()">🏁 Selesai — Done! 🎓</button>`
+    : `<button class="practice-next-btn" onclick="nextPractice()">Soal berikutnya ➡️</button>`;
+}
+
+function nextPractice() {
+  clearDropOverlay();
+  practiceIndex++;
+  loadPracticeQuestion();
+}
+
+function finishPractice() {
+  document.getElementById('practiceResult').classList.add('show');
+  spawnConfetti(); spawnConfetti();
+}
+
+function closePracticeResult() {
+  document.getElementById('practiceResult').classList.remove('show');
+  document.getElementById('practiceArea').classList.remove('show');
+}
+
+
+const htpContent = {
+  en: {
+    title: "How to Play",
+    play: "Let's Play!",
+    steps: [
+      { icon: "🎯", title: "Choose Your Level", desc: "Pick Easy (5 questions), Medium (10 questions), or Hard (15 questions) to start the game." },
+      { icon: "📖", title: "Read the Description", desc: "A mystery word with its description will appear on the card. Read it carefully!" },
+      { icon: "🖱️", title: "Drag & Drop!", desc: "Drag a picture from the options below and DROP it onto the card — it will cover the description area!" },
+      { icon: "👆", title: "Or Just Tap!", desc: "You can also simply tap/click a picture to answer — the image will snap onto the card." },
+      { icon: "✅", title: "Check Your Answer", desc: "Green glow means correct! Red glow means wrong — the right answer will be highlighted." },
+      { icon: "🏆", title: "Score & Win!", desc: "Earn 1 point for each correct answer. Try to get a PERFECT SCORE!" }
+    ],
+    levels: [
+      { cls: "badge-easy",   text: "⭐ Easy — 3 choices" },
+      { cls: "badge-medium", text: "🔥 Medium — 4 choices" },
+      { cls: "badge-hard",   text: "💥 Hard — 5 choices" }
+    ]
+  },
+  id: {
+    title: "Cara Bermain",
+    play: "Ayo Mulai!",
+    steps: [
+      { icon: "🎯", title: "Pilih Level", desc: "Pilih Easy (5 soal), Medium (10 soal), atau Hard (15 soal) untuk memulai permainan." },
+      { icon: "📖", title: "Baca Deskripsinya", desc: "Sebuah kata misterius beserta deskripsinya akan muncul di kartu. Baca dengan seksama!" },
+      { icon: "🖱️", title: "Seret & Lepas!", desc: "Seret gambar dari pilihan di bawah, lalu LEPASKAN ke kartu — gambar akan menutupi area deskripsi!" },
+      { icon: "👆", title: "Atau Ketuk Saja!", desc: "Kamu juga bisa mengetuk/klik gambar untuk menjawab — gambar akan langsung muncul di kartu." },
+      { icon: "✅", title: "Cek Jawabanmu", desc: "Cahaya hijau artinya benar! Cahaya merah artinya salah — jawaban benar akan ditampilkan." },
+      { icon: "🏆", title: "Kumpulkan Poin!", desc: "Dapatkan 1 poin untuk setiap jawaban benar. Coba raih SKOR SEMPURNA!" }
+    ],
+    levels: [
+      { cls: "badge-easy",   text: "⭐ Easy — 3 pilihan" },
+      { cls: "badge-medium", text: "🔥 Medium — 4 pilihan" },
+      { cls: "badge-hard",   text: "💥 Hard — 5 pilihan" }
+    ]
+  }
+};
+
+let currentLang = 'en';
+
+function renderHTP(lang) {
+  const data = htpContent[lang];
+  document.getElementById('htpTitle').textContent = data.title;
+  document.getElementById('htpPlayLabel').textContent = data.play;
+
+  const stepsEl = document.getElementById('htpSteps');
+  stepsEl.innerHTML = data.steps.map(s => `
+    <div class="htp-step">
+      <span class="step-icon">${s.icon}</span>
+      <div class="step-text">
+        <strong>${s.title}</strong>
+        <p>${s.desc}</p>
+      </div>
+    </div>
+  `).join('');
+
+  const levelsEl = document.getElementById('htpLevels');
+  levelsEl.innerHTML = data.levels.map(l => `
+    <span class="htp-level-badge ${l.cls}">${l.text}</span>
+  `).join('');
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('btnEN').classList.toggle('active', lang === 'en');
+  document.getElementById('btnID').classList.toggle('active', lang === 'id');
+  renderHTP(lang);
+}
+
+function openHTP() {
+  renderHTP(currentLang);
+  document.getElementById('htpModal').classList.add('show');
+}
+
+function closeHTP() {
+  document.getElementById('htpModal').classList.remove('show');
+}
+
+// Close modal on backdrop click
+document.getElementById('htpModal').addEventListener('click', function(e) {
+  if (e.target === this) closeHTP();
+});
+
+
+
+function shuffle(arr){ return [...arr].sort(()=>Math.random()-0.5); }
+
+function hideAllModes() {
+  document.getElementById('gameArea').classList.remove('show');
+  document.getElementById('scoreboard').classList.remove('show');
+  document.getElementById('progressBar').classList.remove('show');
+  document.getElementById('practiceArea').classList.remove('show');
+  document.getElementById('practiceResult').classList.remove('show');
+  document.getElementById('resultScreen').classList.remove('show');
+  document.getElementById('progressFill').style.width = '0%';
+}
+
+function startGame(level){
+  hideAllModes();
+  score = 0;
+  if(level==="easy")   { totalQuestions=5;  optionCount=3; questions=shuffle(mixedData).slice(0,5); }
+  if(level==="medium") { totalQuestions=10; optionCount=4; questions=shuffle(mixedData).slice(0,10); }
+  if(level==="hard")   { totalQuestions=15; optionCount=5; questions=shuffle(hardData).slice(0,15); }
+
+  currentIndex=0;
+  document.getElementById("gameArea").classList.add("show");
+  document.getElementById("scoreboard").classList.add("show");
+  document.getElementById("progressBar").classList.add("show");
+  updateHUD();
+  loadQuestion();
+}
+
+function updateHUD(){
+  document.getElementById("scoreNum").textContent = score;
+  document.getElementById("qNum").textContent = currentIndex+1;
+  document.getElementById("qTotal").textContent = totalQuestions;
+  document.getElementById("progressFill").style.width = ((currentIndex/totalQuestions)*100)+"%";
+}
+
+function loadQuestion(){
+  locked=false;
+  const question = questions[currentIndex];
+
+  // === Update question card with word + description ===
+  document.getElementById("questionWordTag").textContent = question.word;
+  document.getElementById("questionDescText").textContent =
+    descriptions[question.word] || question.word;
+
+  // Clear any previously dropped image
+  const droppedWrap = document.getElementById("mainDroppedWrap");
+  const droppedImg  = document.getElementById("mainDroppedImg");
+  droppedWrap.className = "dropped-img-wrap"; // reset classes
+  droppedImg.src = "";
+
+  // Animate question box
+  const qBox = document.getElementById("mainQuestionBox");
+  qBox.style.animation="none"; qBox.offsetHeight;
+  qBox.style.animation="cardPop 0.35s cubic-bezier(.36,.07,.19,.97)";
+
+  // === Drag-and-drop on the question card ===
+  qBox.ondragover  = (e) => { e.preventDefault(); qBox.classList.add('drag-over'); };
+  qBox.ondragleave = ()  => qBox.classList.remove('drag-over');
+  qBox.ondrop      = (e) => {
+    e.preventDefault();
+    qBox.classList.remove('drag-over');
+    if(locked) return;
+    const word  = e.dataTransfer.getData("word");
+    const image = e.dataTransfer.getData("image");
+    // Show dropped image covering description area
+    droppedImg.src = image;
+    droppedWrap.classList.add("show");
+    checkAnswer(word);
+  };
+
+  // Build option cards
+  const container = document.getElementById("optionsContainer");
+  container.innerHTML="";
+
+  let wrong   = shuffle(sourceBank.filter(i=>i.word!==question.word)).slice(0,optionCount-1);
+  let correct = sourceBank.find(i=>i.word===question.word);
+  let all     = shuffle([correct,...wrong]);
+
+  all.forEach((item,idx)=>{
+    const div=document.createElement("div");
+    div.className="option";
+    div.dataset.word=item.word;
+    div.dataset.image=item.image;
+    div.style.animationDelay=(0.05+idx*0.07)+"s";
+    div.innerHTML=`<img src="${item.image}" alt="${item.word}">`;
+
+    // Click to answer — also shows image on card
+    div.onclick=()=>{
+      if(locked) return;
+      droppedImg.src = item.image;
+      droppedWrap.classList.add("show");
+      selectAnswer(div);
+    };
+
+    // Desktop drag
+    div.draggable=true;
+    div.addEventListener('dragstart', (e)=>{
+      e.dataTransfer.setData("word",  item.word);
+      e.dataTransfer.setData("image", item.image);
+      div.style.opacity='0.55';
+    });
+    div.addEventListener('dragend', ()=>{ div.style.opacity=''; });
+    container.appendChild(div);
+  });
+
+  updateHUD();
+}
+
+function selectAnswer(div){
+  if(locked)return;
+  checkAnswer(div.dataset.word);
+}
+
+function checkAnswer(selected){
+  const correct = questions[currentIndex].word;
+  const options = document.querySelectorAll(".option");
+  const droppedWrap = document.getElementById("mainDroppedWrap");
+
+  locked=true;
+
+  if(selected===correct){
+    score++;
+    options.forEach(o=>{ if(o.dataset.word===correct) o.classList.add("correct"); });
+    droppedWrap.classList.add("correct-glow");
+    spawnConfetti();
+  } else {
+    options.forEach(o=>{
+      if(o.dataset.word===selected) o.classList.add("wrong");
+    });
+    droppedWrap.classList.add("wrong-glow");
+    setTimeout(()=>{
+      options.forEach(o=>{
+        if(o.dataset.word===correct) o.classList.add("correct");
+      });
+    }, 600);
+  }
+
+  setTimeout(()=>{
+    currentIndex++;
+    if(currentIndex<totalQuestions){
+      loadQuestion();
+    } else {
+      showResult();
+    }
+  }, 2000);
+}
+
+function spawnConfetti(){
+  const colors=["#fa8231","#ffe066","#43e97b","#1e90ff","#a55eea","#ff4757","#38f9d7"];
+  for(let i=0;i<28;i++){
+    const el=document.createElement("div");
+    el.className="confetti-piece";
+    el.style.cssText=`
+      left:${20+Math.random()*60}%;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      width:${8+Math.random()*10}px;
+      height:${8+Math.random()*10}px;
+      border-radius:${Math.random()>0.5?"50%":"3px"};
+      animation-duration:${1+Math.random()*1.2}s;
+      animation-delay:${Math.random()*0.4}s;
+    `;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 2500);
+  }
+}
+
+function showResult(){
+  document.getElementById("progressFill").style.width="100%";
+  const pct = score/totalQuestions;
+  let emoji="🎉", title="Level Complete!";
+  if(pct===1)      { emoji="🏆"; title="PERFECT SCORE!"; }
+  else if(pct>=0.7){ emoji="🌟"; title="Great Job!"; }
+  else if(pct>=0.4){ emoji="👍"; title="Good Try!"; }
+  else             { emoji="💪"; title="Keep Practicing!"; }
+
+  document.getElementById("resultEmoji").textContent=emoji;
+  document.getElementById("resultTitle").textContent=title;
+  document.getElementById("resultScore").textContent=score+" / "+totalQuestions;
+  document.getElementById("resultScreen").classList.add("show");
+  spawnConfetti(); spawnConfetti();
+}
+
+function hideResult(){
+  hideAllModes();
+}
+
+// ---- BACKGROUND MUSIC (never stops, never fades) ----
+const bgMusic = document.getElementById('bgMusic');
+bgMusic.loop = true;
+bgMusic.volume = 1.0;
+bgMusic.playbackRate = 1.0;
+let musicOn = true;
+
+// Safety net: if the audio ever ends (shouldn't with loop=true), restart it
+bgMusic.addEventListener('ended', () => {
+  if (musicOn) {
+    bgMusic.currentTime = 0;
+    bgMusic.play().catch(() => {});
+  }
+});
+
+// Also restart if it somehow pauses unexpectedly (not by user)
+bgMusic.addEventListener('pause', () => {
+  if (musicOn && !bgMusic._userPaused) {
+    bgMusic.play().catch(() => {});
+  }
+});
+
+function toggleMusic() {
+  musicOn = !musicOn;
+  const btn = document.getElementById('musicToggle');
+  if (musicOn) {
+    bgMusic._userPaused = false;
+    bgMusic.play().catch(() => {});
+    btn.innerHTML = '🎵 Music: ON';
+  } else {
+    bgMusic._userPaused = true;
+    bgMusic.pause();
+    btn.innerHTML = '🔇 Music: OFF';
+  }
+}
+
+// Auto-play on first user interaction
+let musicStarted = false;
+function startMusicOnInteraction() {
+  if (!musicStarted && musicOn) {
+    musicStarted = true;
+    bgMusic._userPaused = false;
+    bgMusic.play().catch(() => {});
+  }
+  document.removeEventListener('click', startMusicOnInteraction);
+  document.removeEventListener('keydown', startMusicOnInteraction);
+  document.removeEventListener('touchstart', startMusicOnInteraction);
+}
+document.addEventListener('click', startMusicOnInteraction);
+document.addEventListener('keydown', startMusicOnInteraction);
+document.addEventListener('touchstart', startMusicOnInteraction);
+
+</script>
+
+
+
+</body>
+</html>
